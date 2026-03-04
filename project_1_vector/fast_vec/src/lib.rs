@@ -74,9 +74,29 @@ impl<T> FastVec<T> {
     // Student 2 should implement this.
     pub fn push(&mut self, t: T) {
         if self.len == self.capacity {
-            todo!("implement growing the vector by doubling the size!");
+            self.capacity = self.capacity * 2;
+            let double_cap_ptr = MALLOC.malloc(size_of::<T>() * self.capacity());
+            for i in 0..self.len{
+                unsafe{
+                    let old_ptr = self.ptr_to_data.add(i);
+                    let new_ptr = (double_cap_ptr as *mut T).add(i);
+                    let old_element = ptr::read(old_ptr);
+                    ptr::write(new_ptr, old_element);
+                }
+            }
+            unsafe{
+                let new_ptr = (double_cap_ptr as *mut T).add(self.len);
+                ptr::write(new_ptr, t);
+            }
+            self.len += 1;
+            self.ptr_to_data = double_cap_ptr as *mut T;
         } else {
-            todo!("implement pushing t directly since the vector still has capacity!");
+            unsafe{
+                let ptr = self.ptr_to_data.add(self.len);
+                ptr::write(ptr, t);
+            }
+            self.len +=1;
+
         }
     }
 
