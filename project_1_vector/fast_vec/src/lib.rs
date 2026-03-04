@@ -84,12 +84,14 @@ impl<T> FastVec<T> {
                     ptr::write(new_ptr, old_element);
                 }
             }
+            MALLOC.free(self.ptr_to_data as *mut u8);
+            self.ptr_to_data = double_cap_ptr as *mut T;
             unsafe{
                 let new_ptr = (double_cap_ptr as *mut T).add(self.len);
                 ptr::write(new_ptr, t);
             }
             self.len += 1;
-            self.ptr_to_data = double_cap_ptr as *mut T;
+            
         } else {
             unsafe{
                 let ptr = self.ptr_to_data.add(self.len);
@@ -103,7 +105,7 @@ impl<T> FastVec<T> {
     // Student 1 should implement this.
     pub fn remove(&mut self, i: usize) {
         if i >=self.len() {
-            panic!("FastVec: removes out of bounds")
+            panic!("FastVec: remove out of bounds")
         } else {
             unsafe {
                 let element_ptr=self.ptr_to_data.add(i);
