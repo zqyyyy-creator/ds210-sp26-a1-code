@@ -103,7 +103,7 @@ impl<T> FastVec<T> {
     // Student 1 should implement this.
     pub fn remove(&mut self, i: usize) {
         if i >=self.len() {
-            panic!("FastVec: removes out of bounds")
+            panic!("FastVec: remove out of bounds")
         } else {
             unsafe {
                 let element_ptr=self.ptr_to_data.add(i);
