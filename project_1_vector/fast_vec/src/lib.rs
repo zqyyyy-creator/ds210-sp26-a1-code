@@ -84,6 +84,8 @@ impl<T> FastVec<T> {
                     ptr::write(new_ptr, old_element);
                 }
             }
+            MALLOC.free(self.ptr_to_data as *mut u8);
+            self.ptr_to_data = double_cap_ptr as *mut T;
             unsafe{
                 let new_ptr = (double_cap_ptr as *mut T).add(self.len);
                 ptr::write(new_ptr, t);
