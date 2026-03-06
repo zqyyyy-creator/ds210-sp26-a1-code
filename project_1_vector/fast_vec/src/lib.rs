@@ -1,4 +1,7 @@
-use std::{fmt::{Display, Formatter}, ptr::{self, null_mut}};
+use std::{
+    fmt::{Display, Formatter},
+    ptr::{self, null_mut},
+};
 
 use malloc::MALLOC;
 
@@ -66,7 +69,7 @@ impl<T> FastVec<T> {
         } else {
             unsafe {
                 let element_ptr = self.ptr_to_data.add(i);
-                return &*element_ptr
+                return &*element_ptr;
             }
         }
     }
@@ -76,43 +79,43 @@ impl<T> FastVec<T> {
         if self.len == self.capacity {
             self.capacity = self.capacity * 2;
             let double_cap_ptr = MALLOC.malloc(size_of::<T>() * self.capacity());
-            for i in 0..self.len{
-                unsafe{
+            for i in 0..self.len {
+                unsafe {
                     let old_ptr = self.ptr_to_data.add(i);
                     let new_ptr = (double_cap_ptr as *mut T).add(i);
                     let old_element = ptr::read(old_ptr);
                     ptr::write(new_ptr, old_element);
                 }
             }
-            unsafe{
+            unsafe {
                 let new_ptr = (double_cap_ptr as *mut T).add(self.len);
                 ptr::write(new_ptr, t);
             }
             self.len += 1;
             self.ptr_to_data = double_cap_ptr as *mut T;
         } else {
-            unsafe{
+            unsafe {
                 let ptr = self.ptr_to_data.add(self.len);
                 ptr::write(ptr, t);
             }
-            self.len +=1;
-
+            self.len += 1;
         }
     }
 
     // Student 1 should implement this.
     pub fn remove(&mut self, i: usize) {
-        if i >=self.len() {
-            panic!("FastVec: removes out of bounds")
+        if i >= self.len() {
+            panic!("FastVec: remove out of bounds")
         } else {
             unsafe {
-                let element_ptr=self.ptr_to_data.add(i);
-                ptr::read(element_ptr);
-                for j in i+1..self.len() {
+                let element_ptr = self.ptr_to_data.add(i);
+                let out = ptr::read(element_ptr);
+                for j in i + 1..self.len() {
                     let v = ptr::read(self.ptr_to_data.add(j));
-                    ptr::write(self.ptr_to_data.add(j-1),v);
+                    ptr::write(self.ptr_to_data.add(j - 1), v);
                 }
-                self.len -= 1
+                self.len -= 1;
+                drop(out);
             }
         }
     }
@@ -141,7 +144,7 @@ impl<T: Display> Display for FastVec<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "FastVec[")?;
         if self.len > 0 {
-            for i in 0..self.len()-1 {
+            for i in 0..self.len() - 1 {
                 write!(f, "{}, ", self.get(i))?;
             }
             write!(f, "{}", self.get(self.len - 1))?;
