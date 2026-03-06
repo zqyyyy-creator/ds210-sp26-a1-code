@@ -92,7 +92,7 @@ impl<T> FastVec<T> {
                 ptr::write(new_ptr, t);
             }
             self.len += 1;
-            self.ptr_to_data = double_cap_ptr as *mut T;
+            
         } else {
             unsafe{
                 let ptr = self.ptr_to_data.add(self.len);
