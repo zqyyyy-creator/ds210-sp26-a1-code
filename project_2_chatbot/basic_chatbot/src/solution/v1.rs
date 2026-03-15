@@ -1,4 +1,5 @@
 use kalosm::language::*;
+use rocket::local::asynchronous;
 
 #[allow(dead_code)]
 pub struct ChatbotV1 {
@@ -17,6 +18,16 @@ impl ChatbotV1 {
             .chat()
             .with_system_prompt("The assistant will act like a pirate");
 
+        let asynchronous_output = chat_session.add_message(message);
+        let output= asynchronous_output.await;
+        match output{
+            Ok(response) => {
+                return response;
+            },
+            Err(e) => {
+                println!("Something went wrong");
+            }
+        }
         // You need to add your code here
         // You must find a way to add the given message to the chat_session!
         // consider https://docs.rs/kalosm/0.4.0/kalosm/language/struct.Chat.html#method.add_message
