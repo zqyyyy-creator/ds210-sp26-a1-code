@@ -1,4 +1,5 @@
 use kalosm::language::*;
+use std::collections::HashMap;
 
 #[allow(dead_code)]
 pub struct ChatbotV3 {
@@ -8,12 +9,16 @@ pub struct ChatbotV3 {
     // together!
     // Need to store one chat session per user.
     // Think of some kind of data structure that can help you with this.
+    model: Llama,
+    sessions: HashMap<String, Chat<Llama>>,
 }
 
 impl ChatbotV3 {
     #[allow(dead_code)]
     pub fn new(model: Llama) -> ChatbotV3 {
         return ChatbotV3 {
+            model:model,
+            sessions: HashMap::new(),
             // Make sure you initialize your struct members here
         };
     }
@@ -24,7 +29,19 @@ impl ChatbotV3 {
         // Notice, you are given both the `message` and also the `username`.
         // Use this information to select the correct chat session for that user and keep it
         // separated from the sessions of other users.
-        return String::from("Hello, I am not a bot (yet)!");
+        if !self.sessions.contains_key(&username) {
+            let chat_session = self.model.chat().with_system_prompt("You are a helpful and concise assistant. Answer the user's questions clearly and briefly.");
+            self.sessions.insert(username.clone(),chat_session);
+        }
+        let chat_session = self.sessions.get_mut(&username).unwrap();
+        let response = chat_session.add_message(message).await;
+        match response {
+            Ok(response) => {
+                chat_session.add_message(response.clone()).await;
+                return response;
+            }
+            Err(e) => return String::from("Error generating response"),
+        }
     }
 
     #[allow(dead_code)]
@@ -33,6 +50,10 @@ impl ChatbotV3 {
         // Hint: think of how you can retrieve the Chat object for that user, when you retrieve it
         // you may want to use https://docs.rs/kalosm/0.4.0/kalosm/language/struct.Chat.html#method.session
         // to then retrieve the history!
-        return Vec::new();
+        if let Some(chat_session) = self.sessions.get(&username) {
+            chat_session.history().iter().map(|message| message.content.clone()).collect()
+        } else {
+                return Vec::new();
+        }
     }
 }
