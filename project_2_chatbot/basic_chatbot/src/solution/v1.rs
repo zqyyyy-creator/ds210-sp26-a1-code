@@ -25,7 +25,7 @@ impl ChatbotV1 {
                 return response;
             },
             Err(e) => {
-                println!("Something went wrong");
+                return String::from("Something went wrong");;
             }
         }
         // You need to add your code here
@@ -33,6 +33,6 @@ impl ChatbotV1 {
         // consider https://docs.rs/kalosm/0.4.0/kalosm/language/struct.Chat.html#method.add_message
         // Hint: make sure you transform/extract the response message as a **String**.
 
-        return String::from("Hello, I am not a bot (yet)!");
+        
     }
 }
