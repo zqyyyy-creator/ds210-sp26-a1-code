@@ -25,7 +25,7 @@ impl ChatbotV1 {
                 return response;
             },
             Err(e) => {
-                return String::from("Something went wrong");;
+                return String::from("Something went wrong");
             }
         }
         // You need to add your code here
