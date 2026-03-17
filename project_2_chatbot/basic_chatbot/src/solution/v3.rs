@@ -17,7 +17,7 @@ impl ChatbotV3 {
     #[allow(dead_code)]
     pub fn new(model: Llama) -> ChatbotV3 {
         return ChatbotV3 {
-            model:model,
+            model: model,
             sessions: HashMap::new(),
             // Make sure you initialize your struct members here
         };
@@ -31,13 +31,12 @@ impl ChatbotV3 {
         // separated from the sessions of other users.
         if !self.sessions.contains_key(&username) {
             let chat_session = self.model.chat().with_system_prompt("You are a helpful and concise assistant. Answer the user's questions clearly and briefly.");
-            self.sessions.insert(username.clone(),chat_session);
+            self.sessions.insert(username.clone(), chat_session);
         }
         let chat_session = self.sessions.get_mut(&username).unwrap();
         let response = chat_session.add_message(message).await;
         match response {
             Ok(response) => {
-                chat_session.add_message(response.clone()).await;
                 return response;
             }
             Err(e) => return String::from("Error generating response"),
@@ -51,9 +50,15 @@ impl ChatbotV3 {
         // you may want to use https://docs.rs/kalosm/0.4.0/kalosm/language/struct.Chat.html#method.session
         // to then retrieve the history!
         if let Some(chat_session) = self.sessions.get(&username) {
-            chat_session.history().iter().map(|message| message.content.clone()).collect()
+            chat_session
+                .session()
+                .unwrap()
+                .history()
+                .iter()
+                .map(|message| message.content().to_string())
+                .collect()
         } else {
-                return Vec::new();
+            return Vec::new();
         }
     }
 }
