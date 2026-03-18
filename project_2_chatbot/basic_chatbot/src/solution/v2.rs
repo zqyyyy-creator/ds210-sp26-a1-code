@@ -22,13 +22,17 @@ impl ChatbotV2 {
 
     #[allow(dead_code)]
     pub async fn chat_with_user(&mut self, message: String) -> String {
-        let response = self.chat_session.add_message(message).await;
-        match response {
+        let asynchronous_output = self.chat_session.add_message(message);
+        let output= asynchronous_output.await;
+        match output{
             Ok(response) => {
-                self.chat_session.add_message(response.clone()).await;
                 return response;
+            },
+            Err(e) => {
+                println!("Something went wrong");
+                return "Error".to_string();
             }
-            Err(e) => return String::from("Error generating response"),
         }
+        // Add your code for chatting with the agent while keeping conversation history here.
     }
 }

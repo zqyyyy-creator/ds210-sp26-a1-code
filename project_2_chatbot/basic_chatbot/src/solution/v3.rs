@@ -3,12 +3,6 @@ use std::collections::HashMap;
 
 #[allow(dead_code)]
 pub struct ChatbotV3 {
-    // What should you store inside your Chatbot type?
-    // The model? The chat_session?
-    // Storing a single chat session is not enough: it mixes messages from different users
-    // together!
-    // Need to store one chat session per user.
-    // Think of some kind of data structure that can help you with this.
     model: Llama,
     sessions: HashMap<String, Chat<Llama>>,
 }
@@ -25,26 +19,44 @@ impl ChatbotV3 {
 
     #[allow(dead_code)]
     pub async fn chat_with_user(&mut self, username: String, message: String) -> String {
-        // Add your code for chatting with the agent while keeping conversation history here.
-        // Notice, you are given both the `message` and also the `username`.
-        // Use this information to select the correct chat session for that user and keep it
-        // separated from the sessions of other users.
-        if !self.sessions.contains_key(&username) {
-            let chat_session = self.model.chat().with_system_prompt("You are a helpful and concise assistant. Answer the user's questions clearly and briefly.");
-            self.sessions.insert(username.clone(), chat_session);
+
+        if !self.chat_sessions.contains_key(&username) {
+            let chat_session = self.model
+            .chat()
+            .with_system_prompt("The assistant will act like a pirate");
+            
+            self.chat_sessions.insert(username.clone(), chat_session);
         }
-        let chat_session = self.sessions.get_mut(&username).unwrap();
-        let response = chat_session.add_message(message).await;
-        match response {
+
+        let session = self.chat_sessions.get_mut(&username).unwrap();
+        let asynchronous_output = session.add_message(message);
+        let output= asynchronous_output.await;
+
+        match output{
             Ok(response) => {
                 return response;
+            },
+            Err(e) => {
+                println!("Something went wrong");
+                return "Error".to_string();
             }
-            Err(e) => return String::from("Error generating response"),
         }
-    }
 
     #[allow(dead_code)]
     pub fn get_history(&self, username: String) -> Vec<String> {
+        let mut history_as_strings = Vec::new();
+
+        if self.chat_sessions.contains_key(&username) {
+            let session = self.chat_sessions.get(&username).unwrap();
+            let history = session.session().unwrap().history();
+
+            for message in history{
+            let mut text = message.content().to_string();
+            history_as_strings.push(text);
+            }
+
+            return history_as_strings;
+        }
         // Extract the chat message history for the given username
         // Hint: think of how you can retrieve the Chat object for that user, when you retrieve it
         // you may want to use https://docs.rs/kalosm/0.4.0/kalosm/language/struct.Chat.html#method.session
