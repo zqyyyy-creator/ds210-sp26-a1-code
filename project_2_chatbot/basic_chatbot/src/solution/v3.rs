@@ -4,7 +4,7 @@ use std::collections::HashMap;
 #[allow(dead_code)]
 pub struct ChatbotV3 {
     model: Llama,
-    sessions: HashMap<String, Chat<Llama>>,
+    chat_sessions: HashMap<String, Chat<Llama>>,
 }
 
 impl ChatbotV3 {
@@ -12,7 +12,7 @@ impl ChatbotV3 {
     pub fn new(model: Llama) -> ChatbotV3 {
         return ChatbotV3 {
             model: model,
-            sessions: HashMap::new(),
+            chat_sessions: HashMap::new(),
             // Make sure you initialize your struct members here
         };
     }
@@ -23,7 +23,7 @@ impl ChatbotV3 {
         if !self.chat_sessions.contains_key(&username) {
             let chat_session = self.model
             .chat()
-            .with_system_prompt("The assistant will act like a pirate");
+            .with_system_prompt("You are a helpful and concise assistant. Answer the user's questions clearly and briefly.");
             
             self.chat_sessions.insert(username.clone(), chat_session);
         }
@@ -41,6 +41,7 @@ impl ChatbotV3 {
                 return "Error".to_string();
             }
         }
+    }
 
     #[allow(dead_code)]
     pub fn get_history(&self, username: String) -> Vec<String> {
@@ -58,5 +59,5 @@ impl ChatbotV3 {
             return history_as_strings;
         }
         return Vec::new();
+        }
     }
-}
