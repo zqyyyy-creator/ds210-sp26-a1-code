@@ -57,20 +57,6 @@ impl ChatbotV3 {
 
             return history_as_strings;
         }
-        // Extract the chat message history for the given username
-        // Hint: think of how you can retrieve the Chat object for that user, when you retrieve it
-        // you may want to use https://docs.rs/kalosm/0.4.0/kalosm/language/struct.Chat.html#method.session
-        // to then retrieve the history!
-        if let Some(chat_session) = self.sessions.get(&username) {
-            chat_session
-                .session()
-                .unwrap()
-                .history()
-                .iter()
-                .map(|message| message.content().to_string())
-                .collect()
-        } else {
-            return Vec::new();
-        }
+        return Vec::new();
     }
 }
