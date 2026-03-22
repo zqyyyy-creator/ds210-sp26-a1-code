@@ -42,15 +42,34 @@ impl ChatbotV5 {
         match cached_chat {
             None => {
                 println!("get_history: {username} is not in the cache!");
-                // TODO: The cache does not have the chat. What should you do?
-                // Your code goes here.
-                return Vec::new();
+                let mut chat_session = self.model.chat();
+                let history_chat_session = file_library::load_chat_session_from_file(&filename);
+                match history_chat_session {
+                    None => {
+                    },
+                Some(session) => {
+                    chat_session = chat_session.with_session(session)
+                    }
+                }
+                self.cache.insert_chat(username.clone(), chat_session);
+                let chat_session = self.cache.get_chat(&username).unwrap();
+                let history = chat_session.session().unwrap().history();
+                let mut history_in_strings = Vec::new();
+                for message in history {
+                    history_in_strings.push(message.content().to_string());
+                }
+                return history_in_strings;
             }
             Some(chat_session) => {
                 println!("get_history: {username} is in the cache! Nice!");
-                // TODO: The cache has this chat. What should you do?
-                // Your code goes here.
-                return Vec::new();
+                let mut history_as_strings = Vec::new();
+                let history = chat_session.session().unwrap().history();
+                for message in history{
+                    let mut text = message.content().to_string();
+                    history_as_strings.push(text);
+                }
+
+                return history_as_strings;
 
             }
         }

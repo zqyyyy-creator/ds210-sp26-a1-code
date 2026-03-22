@@ -32,8 +32,12 @@ impl<V> Cache<V> {
 
     // Helper functions.
     fn remove_least_recently_used(&mut self) {
-        // TODO: your code goes here.
-        // println!("Removing least recently used");
+        if self.usage_history.len() == 0 {
+            println!("Error: the cache is empty, but you are trying to remove an element from it.");
+            return;
+        }
+        let least_rencently_used_key = self.usage_history.remove(0);
+        self.hashmap.remove(&least_rencently_used_key);
     }
     fn mark_as_most_recently_used(&mut self, username: String) {
         // TODO: your code goes here.
