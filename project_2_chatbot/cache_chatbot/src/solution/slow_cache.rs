@@ -33,7 +33,7 @@ impl<V> Cache<V> {
     // Helper functions.
     fn remove_least_recently_used(&mut self) {
         if self.usage_history.len() == 0 {
-            println!("Error: the cache is empty, but you are trying to remove an element from it.");
+            println!("Error: the cache is empty");
             return;
         }
         let least_rencently_used_key = self.usage_history.remove(0);
