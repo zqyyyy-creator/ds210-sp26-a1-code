@@ -25,14 +25,22 @@ pub fn save_chat_session_to_file(filename: &str, session: &LlamaChatSession) {
 
 // Implement this
 pub fn load_chat_session_from_file(filename: &str) -> Option<LlamaChatSession> {
-    let load_file = fs::read(filename).unwrap();
-    let mut session = LlamaChatSession::from_bytes(&load_file);
-    match session {
-        Ok(session) => {
-            return Some(session);
+    let load_file = fs::read(filename);
+    match load_file {
+        Ok (bytes) => {
+            let session = LlamaChatSession::from_bytes(&bytes);
+            match session {
+            Ok(session) => {
+                return Some(session);
+            }
+            Err(e) => {
+                println!("Error occurred while loading session from file: {}", e);
+                return None;
         }
+    }
+        },
         Err(e) => {
-            println!("Error occurred while loading session from file: {}", e);
+            println!("Error occurred while reading session from file: {}", e);
             return None;
         }
     }

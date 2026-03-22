@@ -21,9 +21,7 @@ impl ChatbotV3 {
     pub async fn chat_with_user(&mut self, username: String, message: String) -> String {
 
         if !self.chat_sessions.contains_key(&username) {
-            let chat_session = self.model
-            .chat()
-            .with_system_prompt("You are a helpful and concise assistant. Answer the user's questions clearly and briefly.");
+            let chat_session = self.model.chat();
             
             self.chat_sessions.insert(username.clone(), chat_session);
         }
