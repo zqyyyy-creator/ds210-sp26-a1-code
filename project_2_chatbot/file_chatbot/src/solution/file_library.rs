@@ -25,7 +25,8 @@ pub fn save_chat_session_to_file(filename: &str, session: &LlamaChatSession) {
 
 // Implement this
 pub fn load_chat_session_from_file(filename: &str) -> Option<LlamaChatSession> {
-    let mut session = LlamaChasSession::from_bytes(fs::read(filename).unwrap());
+    let load_file = fs::read(filename).unwrap();
+    let mut session = LlamaChatSession::from_bytes(&load_file);
     match session {
         Ok(session) => {
             return Some(session);
