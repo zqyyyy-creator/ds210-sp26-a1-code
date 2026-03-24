@@ -23,19 +23,30 @@ impl ChatbotV4 {
         // Think about what needs to happen if the function returns None vs Some(session).
         // Hint: look at https://docs.rs/kalosm/latest/kalosm/language/struct.Chat.html#method.with_session
         let history_chat_session = file_library::load_chat_session_from_file(&filename);
-        match history_chat_session {
-            None => {
-            },
-            Some(session) => {
-                chat_session = chat_session.with_session(session);
-            }
+
+        if let Some(session) = history_chat_session {
+            chat_session = chat_session.with_session(session);
         }
-        let asynchronous_output = chat_session.add_message(message);
-        let output= asynchronous_output.await;
-        let session = chat_session.session().unwrap();
+
+        //match history_chat_session {
+         //   None => {
+          //  },
+          //  Some(session) => {
+          ///      chat_session = chat_session.with_session(session);
+          //  }
+         //  }
+        //let asynchronous_output = chat_session.add_message(message);
+        //let output= asynchronous_output.await;
+        //let session = chat_session.session().unwrap();
+
+        let output = chat_session.add_message(message).await;
+
         match output{
             Ok(response) => {
-                file_library::save_chat_session_to_file(&filename, &session);
+                if let Ok(updated_session) = chat_session.session() {
+                    file_library::save_chat_session_to_file(&filename, &updated_session);
+                }
+                //file_library::save_chat_session_to_file(&filename, &session);
                 return response;
             }
             Err(e) => {
@@ -55,6 +66,9 @@ impl ChatbotV4 {
             Some(session) => {
                 // TODO: what should happen here?
                 let history = session.history();
+
+                println!("History requested for {}: found {} messages", username, history.len());
+
                 let mut history_in_strings = Vec::new();
                 for message in history {
                     history_in_strings.push(message.content().to_string());

@@ -40,8 +40,18 @@ impl<V> Cache<V> {
         self.hashmap.remove(&least_rencently_used_key);
     }
     fn mark_as_most_recently_used(&mut self, username: String) {
-        // TODO: your code goes here.
-        // println!("Marking {username} as most recently used");
+        if self.usage_history.len() == 0 {
+            println!("Error: the cache is empty");
+            return;
+        }
+        if let Some(most_recently_used_key) = self.usage_history.iter().position(|x| *x == username) {
+            let key = self.usage_history.remove(most_recently_used_key);
+            self.usage_history.push(key);
+            println!("{} is now the most recently used!", username);
+    
+          } else {
+            println!("Error: the cache does not contain {}", username);
+          }
     }
 
     // Reading from the cache:
@@ -59,17 +69,23 @@ impl<V> Cache<V> {
     // 1. What if cache is at capacity?
     // 2. What should be the most recently used chat after this insertion?
     pub fn insert_chat(&mut self, username: String, chat: V) {
-        println!("Insert {username} into cache:");
-        println!("Cache before inserting: -----");
-        println!("{:?}", self);
-        println!("-----------------------------");
-
-        self.hashmap.insert(username.clone(), chat);
-        self.mark_as_most_recently_used(username);
-        if self.hashmap.len() > self.max_size {
+        if self.hashmap.contains_key(&username){
+            self.hashmap.insert(username.clone(), chat);
+            println!("Insert {username} into cache:");
+            self.mark_as_most_recently_used(username);
+            println!("Cache before inserting: -----");
+            println!("{:?}", self);
+            println!("-----------------------------");
+            return;
+             
+        }
+       
+        if self.hashmap.len() >= self.max_size {
             self.remove_least_recently_used();
         }
-
+        
+        self.hashmap.insert(username.clone(), chat);
+        self.usage_history.push(username);
         println!("Cache after inserting: ------");
         println!("{:?}", self);
         println!("-----------------------------");
