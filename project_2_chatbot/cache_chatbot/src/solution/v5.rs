@@ -23,43 +23,39 @@ impl ChatbotV5 {
         match cached_chat {
             None => {
                 println!("chat_with_user: {username} is not in the cache!");
-                // The cache does not have the chat. What should you do?
                 let mut chat_session = self.model.chat();
-                if let Some(past_session) = file_library::load_chat_session_from_file(&filename){
-                    chat_session = chat_session.with_session(past_session);
+                if let Some(session) = file_library::load_chat_session_from_file(filename) {
+                    chat_session = chat_session.with_session(session);
                 }
-                
-                let output = chat_session.add_message(message).await;
 
+                let output = chat_session.add_message(message).await;
                 match output {
                     Ok(response) => {
-                        self.cache.insert_chat(username.clone(), chat_session.clone());
-                        if let Ok(updated_session) = chat_session.session() {
-                            file_library::save_chat_session_to_file(&filename, &updated_session);
+                        {
+                            let session = chat_session.session().unwrap();
+                            file_library::save_chat_session_to_file(filename, &session);
                         }
-                        response
+                        self.cache.insert_chat(username, chat_session);
+                        return response;
                     }
-                    Err(e) => {
+                    Err(_) => {
                         println!("Something went wrong");
-                        String::from("Error")
+                        return "Error".to_string();
                     }
-                }  
+                }
             }
             Some(mut chat_session) => {
                 println!("chat_with_user: {username} is in the cache! Nice!");
                 let output = chat_session.add_message(message).await;
-
                 match output {
                     Ok(response) => {
-                        self.cache.insert_chat(username.clone(), chat_session.clone());
-                        if let Ok(updated_session) = chat_session.session() {
-                            file_library::save_chat_session_to_file(&filename, &updated_session);
-                        }
-                        response
+                        let session = chat_session.session().unwrap();
+                        file_library::save_chat_session_to_file(filename, &session);
+                        return response;
                     }
-                    Err(e) => {
+                    Err(_) => {
                         println!("Something went wrong");
-                        return String::from("Error");
+                        return "Error".to_string();
                     }
                 }
             }
@@ -96,7 +92,7 @@ impl ChatbotV5 {
                 let mut history_as_strings = Vec::new();
                 let history = chat_session.session().unwrap().history();
                 for message in history{
-                    let mut text = message.content().to_string();
+                    let text = message.content().to_string();
                     history_as_strings.push(text);
                 }
 
