@@ -6,7 +6,7 @@ use crate::query::{Aggregation, Condition, Query};
 
 fn row_matches(dataset: &Dataset, row: &Row, condition: &Condition) -> bool {
     match condition {
-        Condition::Equal(column_name,value ) => {
+        Condition::Equal(column_name,value) => {
             let column_index = dataset.column_index(column_name);
             return row.get_value(column_index) == value;
         },
