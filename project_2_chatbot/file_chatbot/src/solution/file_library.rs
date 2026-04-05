@@ -12,13 +12,38 @@ use std::fs;
 
 // Implement this
 pub fn save_chat_session_to_file(filename: &str, session: &LlamaChatSession) {
-    // look at fs::write(...)
-    unimplemented!("Saving chat session to file {filename}");
+    let bytes_session = session.to_bytes();
+    match bytes_session {
+        Ok(bytes) => {
+            fs::write(filename, bytes).unwrap();
+        }
+        Err(e) => {
+            println!("Error occurred while converting session to bytes: {}", e);
+        }
+    };
 }
 
 // Implement this
 pub fn load_chat_session_from_file(filename: &str) -> Option<LlamaChatSession> {
+    let load_file = fs::read(filename);
+    match load_file {
+        Ok (bytes) => {
+            let session = LlamaChatSession::from_bytes(&bytes);
+            match session {
+            Ok(session) => {
+                return Some(session);
+            }
+            Err(e) => {
+                println!("Error occurred while loading session from file: {}", e);
+                return None;
+        }
+    }
+        },
+        Err(e) => {
+            println!("Error occurred while reading session from file: {}", e);
+            return None;
+        }
+    }
     // look at fs::read(...)
     // also look at LlamaChatSession::from_bytes(...)
-    unimplemented!("Loading chat session from file {filename}");
 }
