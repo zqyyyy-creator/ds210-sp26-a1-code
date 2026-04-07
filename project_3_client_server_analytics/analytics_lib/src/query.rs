@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
 use crate::dataset::Value;
-use serde::{Serialize, Deserialize};
+
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+
 
 pub enum Condition {
     Equal(String, Value),
