@@ -15,7 +15,7 @@ impl Agent for SolutionAgent {
             return (board.score(), 0, 0);
         };
         let moves = board.moves();
-        let mut best_move = moves[0];
+        let mut best_move = moves[0]; 
         let mut best_score = match player {
             Player::X => i32::MIN,
             Player::O => i32::MAX,
@@ -26,6 +26,21 @@ impl Agent for SolutionAgent {
             let (score, _, _) = SolutionAgent::solve(board, next_player, _time_limit);
             board.undo_move(m, player);
             // Add recursive call here
+            match player {
+                Player::X => {
+                    if score > best_score {
+                        best_score = score;
+                        best_move = m;
+                    }
+
+                }
+                Player::O => {
+                    if score < best_score {
+                        best_score = score;
+                        best_move = m;
+                    }
+                }
+            }
 
         }
         // If you want to make a recursive call to this solution, use
