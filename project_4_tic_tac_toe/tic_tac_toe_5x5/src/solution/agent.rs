@@ -17,6 +17,13 @@ impl SolutionAgent {
         _ => None, // This covers 'Empty' and 'Wall'
     }
 }
+    fn score_for_player(score:i32, player: Player) -> i32 {
+        match player {
+            Player::X => score,
+            Player::O => -score,
+        }
+    }
+
     fn immediate_move_value(board:&mut Board, m: (usize, usize), player: Player) -> i32 {
         let before = Self::heuristic(board);
 
@@ -123,17 +130,17 @@ impl SolutionAgent {
         return score;
     }
 
-    fn minmax(board: &mut Board, player: Player,depth: usize, max_depth: usize, mut alpha: i32, mut beta: i32, deadline: Instant, timed_out:&mut bool) -> (i32, usize, usize) {
+    fn minmax(board: &mut Board, player: Player,perspective: Player, depth: usize, max_depth: usize, mut alpha: i32, mut beta: i32, deadline: Instant, timed_out:&mut bool) -> (i32, usize, usize) {
         if Instant::now() >= deadline {
             *timed_out = true;
-            return (Self::heuristic(board), 0, 0); 
+            return (Self::score_for_player(Self::heuristic(board), perspective), 0, 0); 
         }
         if board.game_over() {
-            return (board.score()*100, 0, 0);
+            return (Self::score_for_player(board.score()*100, perspective), 0, 0);
         }
 
         if depth == max_depth {
-            return (SolutionAgent::heuristic(board), 0, 0);
+            return (Self::score_for_player(Self::heuristic(board), perspective), 0, 0);
         }
 
         let mut moves = board.moves();
@@ -143,41 +150,35 @@ impl SolutionAgent {
             });
         }
         let mut best_move = moves[0]; 
-        let mut best_score = match player {
-            Player::X => i32::MIN,
-            Player::O => i32::MAX,
-        };
+        let maximizing = player == perspective;
+        let mut best_score = if maximizing { i32::MIN } else { i32::MAX };
         let next_player = player.flip();
         for m in moves {
             board.apply_move(m, player);
-            let (score, _, _) = SolutionAgent::minmax(board, next_player, depth + 1, max_depth, alpha, beta, deadline, timed_out);
+            let (score, _, _) = SolutionAgent::minmax(board, next_player, perspective,depth + 1, max_depth, alpha, beta, deadline, timed_out);
             board.undo_move(m, player);
             if *timed_out {
                 break;
             }
-            match player {
-                Player::X => {
-                    if score > best_score {
-                        best_score = score;
-                        best_move = m;
-                    }
-                    alpha = alpha.max(best_score);
-                    if beta <= alpha {
-                        break;
-                    }
-
-                }
-                Player::O => {
-                    if score < best_score {
-                        best_score = score;
-                        best_move = m;
-                    }
-                    beta = beta.min(best_score);
-                    if beta <= alpha {
-                        break;
-                    }
-                }
+           if maximizing {
+            if score > best_score {
+                best_score = score;
+                best_move = m;
             }
+            alpha = alpha.max(best_score);
+            if beta <= alpha {
+                break;
+            }
+            } else {
+            if score < best_score {
+            best_score = score;
+            best_move = m;
+            }
+            beta = beta.min(best_score);
+            if beta <= alpha {
+                break;
+        }
+    }
 
         }
         // If you want to make a recursive call to this solution, use
@@ -208,12 +209,12 @@ impl Agent for SolutionAgent {
 
         for depth in 1..=max_possible_depth {
             let mut timed_out = false;
-            let result = SolutionAgent::minmax(board, player, 0, depth, i32::MIN, i32::MAX, deadline, &mut timed_out);
+            let result = SolutionAgent::minmax(board, player, player,0, depth, i32::MIN, i32::MAX, deadline, &mut timed_out);
             if timed_out {
                 break;
             }
             best_result = result;
-        }
+        }   
         best_result
     }
 }
